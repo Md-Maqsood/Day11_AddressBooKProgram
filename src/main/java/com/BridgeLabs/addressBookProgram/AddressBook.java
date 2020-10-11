@@ -25,60 +25,56 @@ public class AddressBook implements ManageAddressBook {
 		this.nameToContactMap = new LinkedHashMap<String, Contact>();
 	}
 
-	public void addContacts() {
-		while (true) {
-			logger.debug("1.Add next Contact\n2.Exit\nEnter your choice: ");
-			int choice1 = Integer.parseInt(sc.nextLine());
-			if (choice1 == 1) {
-				logger.debug(
-						"Enter the fields in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
-				Contact contact = new Contact(sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(),
-						Integer.parseInt(sc.nextLine()), Long.parseLong(sc.nextLine()), sc.nextLine());
-				if (checkDuplicacy(contact)) {
-					logger.debug("Same entry already present. Cannot allow duplicate entries in an address book.");
-				} else {
-					this.contacts.add(contact);
-					this.nameToContactMap.put(contact.getFirstName() + " " + contact.getLastName(), contact);
-				}
-			} else {
-				break;
-			}
-		}
-
-	}
-
 	/**
-	 * uc7
-	 * @param contact
-	 * @return
+	 *uc7
 	 */
-	public boolean checkDuplicacy(Contact contact) {
-		Contact possibleDuplicate = nameToContactMap.get(contact.getFirstName() + " " + contact.getLastName());
-		if (possibleDuplicate != null) {
-			if (possibleDuplicate.equals(contact)) {
-				return true;
+	public void addContacts() {
+		do {
+			logger.debug("Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
+			Contact newContact = new Contact(sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(),
+					Integer.parseInt(sc.nextLine()), Long.parseLong(sc.nextLine()), sc.nextLine());
+			if (contacts.stream().anyMatch(contact -> contact.equals(newContact))) {
+				logger.debug("Same entry already present. Cannot allow duplicate entries in an address book.");
+			} else {
+				this.contacts.add(newContact);
+				this.nameToContactMap.put(newContact.getFirstName() + " " + newContact.getLastName(), newContact);
 			}
-		}
-		return false;
+			logger.debug("Enter 1 to add another contact, else enter 0: ");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
+
 	}
 
 	public void editContact() {
-		logger.debug("Enter name of person whose contact details are to be edited: ");
-		String name = sc.nextLine();
-		logger.debug("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
-		nameToContactMap.get(name).setAddress(sc.nextLine());
-		nameToContactMap.get(name).setCity(sc.nextLine());
-		nameToContactMap.get(name).setState(sc.nextLine());
-		nameToContactMap.get(name).setZip(Integer.parseInt(sc.nextLine()));
-		nameToContactMap.get(name).setPhoneNumber(Long.parseLong(sc.nextLine()));
-		nameToContactMap.get(name).setEmail(sc.nextLine());
+		do {
+			logger.debug("Enter name of person whose contact details are to be edited: ");
+			String name = sc.nextLine();
+			logger.debug("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
+			try {
+				Contact toBeEditedContact=nameToContactMap.get(name);
+				toBeEditedContact.setAddress(sc.nextLine());
+				toBeEditedContact.setCity(sc.nextLine());
+				toBeEditedContact.setState(sc.nextLine());
+				toBeEditedContact.setZip(Integer.parseInt(sc.nextLine()));
+				toBeEditedContact.setPhoneNumber(Long.parseLong(sc.nextLine()));
+				toBeEditedContact.setEmail(sc.nextLine());
+				logger.debug("Contact after editing:\n"+toBeEditedContact);
+			} catch (NullPointerException e) {
+				logger.debug("No contact found with that name.");
+			}
+			logger.debug("Enter 1 to edit another contact, else enter 0: ");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
 	}
 
 	public void deleteContact() {
-		logger.debug("Enter the name of Contact person to be deleted: ");
-		String name = sc.nextLine();
-		contacts.remove(nameToContactMap.get(name));
-		nameToContactMap.remove(name);
+		do {
+			logger.debug("Enter the name of Contact person to be deleted: ");
+			String name = sc.nextLine();
+			Contact toBeDeletedContact=nameToContactMap.get(name);
+			contacts.remove(toBeDeletedContact);
+			nameToContactMap.remove(name);
+			logger.debug("Address Book after deletion of contact: \n" + this);
+			logger.debug("Enter 1 to delete another contact, else enter 0: ");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
 	}
 
 	public static void addAddressBooks() {
@@ -104,26 +100,19 @@ public class AddressBook implements ManageAddressBook {
 
 	public static void main(String[] args) {
 		addAddressBooks();
-		logger.debug("Enter the name of the address book to continue: ");
-		AddressBook addressBook = nameToAddressBookMap.get(sc.nextLine());
-		if (addressBook == null) {
-			logger.debug("No address book found with that name.");
-			;
-		} else {
-			addressBook.addContacts();
-			logger.debug(addressBook);
-			logger.debug("Before edit:");
-			for (Contact contact : addressBook.contacts) {
-				logger.debug(contact);
+		do {
+			logger.debug("Enter the name of the address book to continue: ");
+			AddressBook addressBook = nameToAddressBookMap.get(sc.nextLine());
+			if (addressBook == null) {
+				logger.debug("No address book found with that name.");
+			} else {
+				addressBook.addContacts();
+				logger.debug(addressBook);
+				addressBook.editContact();
+				addressBook.deleteContact();
 			}
-			addressBook.editContact();
-			logger.debug("After edit");
-			for (Contact contact : addressBook.contacts) {
-				logger.debug(contact);
-			}
-			addressBook.deleteContact();
-			logger.debug("After deletion of contact: \n" + addressBook);
-		}
+			logger.debug("Enter 1 to continue with another address book, else enter 0: ");
+		} while (Integer.parseInt(sc.nextLine()) == 1);
 		sc.close();
 	}
 
