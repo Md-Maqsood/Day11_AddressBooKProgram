@@ -120,6 +120,24 @@ public class AddressBook implements ManageAddressBook {
 			logger.debug("");
 		});
 	}
+	
+	/**
+	 * uc10 Method to display no. of contacts by city and state in all address books
+	 */
+	public static void displayCountByCityAndState() {
+		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
+			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			logger.debug("In the address book " + addressBookName);
+			logger.debug("");
+			logger.debug("Contact counts by city");
+			addressBook.cityToContactsMap.keySet().stream().forEach(
+					cityName -> logger.debug(cityName + ": " + addressBook.cityToContactsMap.get(cityName).size()));
+			logger.debug("\nContact counts by state");
+			addressBook.stateToContactsMap.keySet().stream().forEach(
+					stateName -> logger.debug(stateName + ": " + addressBook.stateToContactsMap.get(stateName).size()));
+			logger.debug("");
+		});
+	}
 
 	public void editContact() {
 		do {
@@ -193,6 +211,7 @@ public class AddressBook implements ManageAddressBook {
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 		getPersonsByCityOrState();
 		viewPersonsByCityOrState();
+		displayCountByCityAndState();
 		sc.close();
 	}
 
