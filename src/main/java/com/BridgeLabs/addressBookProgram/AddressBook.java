@@ -10,7 +10,13 @@ import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 public class AddressBook implements ManageAddressBook {
+	
+	public enum SearchBy {
+		CITY, STATE
+	}
+	
 	private static final Logger logger = LogManager.getLogger(AddressBook.class);
 	static Scanner sc = new Scanner(System.in);
 	static Map<String, AddressBook> nameToAddressBookMap = new HashMap<String, AddressBook>();
@@ -42,6 +48,26 @@ public class AddressBook implements ManageAddressBook {
 			logger.debug("Enter 1 to add another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 
+	}
+	
+	/**
+	 * uc8 Method to search all contacts in a given city/state in all address books
+	 */
+	public static void getPersonsByCityOrState() {
+		logger.debug("Choose \n1 To search by city\n2 To search by state\nEnter your choice: ");
+		SearchBy searchByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
+		logger.debug("Enter the name of " + searchByParameter.name() + ": ");
+		String cityOrStateName = sc.nextLine();
+		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
+			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			logger.debug("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
+					+ addressBookName + " are: ");
+			addressBook.contacts.stream()
+					.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
+							.equals(cityOrStateName)))
+					.forEach(contact -> logger.debug(contact));
+			logger.debug("");
+		});
 	}
 
 	public void editContact() {
@@ -113,6 +139,7 @@ public class AddressBook implements ManageAddressBook {
 			}
 			logger.debug("Enter 1 to continue with another address book, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
+		getPersonsByCityOrState();
 		sc.close();
 	}
 
