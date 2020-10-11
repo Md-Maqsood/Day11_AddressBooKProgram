@@ -6,10 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 
 public class AddressBook implements ManageAddressBook {
 	
@@ -23,12 +25,16 @@ public class AddressBook implements ManageAddressBook {
 	public String name;
 	public List<Contact> contacts;
 	public Map<String, Contact> nameToContactMap;
+	public Map<String, List<Contact>> cityToContactsMap;
+	public Map<String, List<Contact>> stateToContactsMap;
 
 	public AddressBook(String name) {
 		super();
 		this.name = name;
 		this.contacts = new LinkedList<Contact>();
 		this.nameToContactMap = new LinkedHashMap<String, Contact>();
+		this.cityToContactsMap = new TreeMap<String, List<Contact>>();
+		this.stateToContactsMap = new TreeMap<String, List<Contact>>();
 	}
 
 	/**
@@ -66,6 +72,51 @@ public class AddressBook implements ManageAddressBook {
 					.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
 							.equals(cityOrStateName)))
 					.forEach(contact -> logger.debug(contact));
+			logger.debug("");
+		});
+	}
+	
+	/**
+	 * uc9 Method to map list of contacts to cities and states in this address book
+	 */
+	public void generateContactsListByCityAndState() {
+		Set<String> cityNames=contacts.stream().map(contact->contact.getCity()).collect(Collectors.toSet());
+		Set<String> stateNames=contacts.stream().map(contact->contact.getState()).collect(Collectors.toSet());
+		this.cityToContactsMap = cityNames.stream()
+				.collect(Collectors.toMap(cityName -> cityName,
+						cityName -> {
+							return contacts.stream().filter(contact -> contact.getCity().equals(cityName)).sorted((c1, c2) -> {
+								return c1.getFirstName().compareTo(c2.getFirstName());
+							}).collect(Collectors.toList());
+						}));
+		this.stateToContactsMap = stateNames.stream()
+				.collect(Collectors.toMap(stateName -> stateName,
+						stateName -> {
+							return contacts.stream().filter(contact -> contact.getState().equals(stateName)).sorted((c1, c2) -> {
+								return c1.getFirstName().compareTo(c2.getFirstName());
+							}).collect(Collectors.toList());
+						}));
+		}
+	
+	/**
+	 * uc9 Method to display all contacts in all cities/states in all address books
+	 */
+	public static void viewPersonsByCityOrState() {
+		logger.debug("Choose \n1 To view by city\n2 To view by state\nEnter your choice: ");
+		SearchBy viewByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
+		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
+			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
+			addressBook.generateContactsListByCityAndState();
+			logger.debug("In the address book " + addressBookName);
+			logger.debug("");
+			(viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.keySet()
+					: addressBook.stateToContactsMap.keySet()).stream().forEach(cityOrStateName -> {
+						logger.debug(viewByParameter.name() + ": " + cityOrStateName);
+						(viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.get(cityOrStateName)
+								: addressBook.stateToContactsMap.get(cityOrStateName)).stream()
+										.forEach(contact -> logger.debug(contact));
+						logger.debug("");
+					});
 			logger.debug("");
 		});
 	}
@@ -136,10 +187,12 @@ public class AddressBook implements ManageAddressBook {
 				logger.debug(addressBook);
 				addressBook.editContact();
 				addressBook.deleteContact();
+				addressBook.generateContactsListByCityAndState();
 			}
 			logger.debug("Enter 1 to continue with another address book, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 		getPersonsByCityOrState();
+		viewPersonsByCityOrState();
 		sc.close();
 	}
 
