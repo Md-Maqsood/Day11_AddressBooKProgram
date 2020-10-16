@@ -56,8 +56,23 @@ public class AddressBook implements ManageAddressBook {
 
 	}
 	
-	public void sortContactsByName() {
-		contacts=contacts.stream().sorted((contact1,contact2)->contact1.getFirstName().compareTo(contact2.getFirstName())).collect(Collectors.toList());
+	public List<Contact> sortContactsByName() {
+		return contacts.stream().sorted((contact1,contact2)->contact1.getFirstName().compareTo(contact2.getFirstName())).collect(Collectors.toList());
+	}
+	
+	public List<Contact> sortByCityStateOrZip(){
+		logger.info("Enter 1 to sort by city\n2 to sort by state\n3 to sort by zip");
+		switch(Integer.parseInt(sc.nextLine())) {
+		case 1:
+			return contacts.stream().sorted((contact1,contact2)->contact1.getCity().compareTo(contact2.getCity())).collect(Collectors.toList());
+		case 2:
+			return contacts.stream().sorted((contact1,contact2)->contact1.getState().compareTo(contact2.getState())).collect(Collectors.toList());
+		case 3:
+			return contacts.stream().sorted((contact1,contact2)->((Integer)contact1.getZip()).compareTo((Integer)contact2.getZip())).collect(Collectors.toList());
+		default:
+			logger.info("Invalid Input.");
+			return contacts;
+		}
 	}
 	
 	/**
@@ -207,7 +222,12 @@ public class AddressBook implements ManageAddressBook {
 			} else {
 				addressBook.addContacts();
 				logger.info(addressBook);
-				addressBook.sortContactsByName();
+				List<Contact> sortedContacts =addressBook.sortContactsByName();
+				logger.info("Contacts sorted by name are: ");
+				sortedContacts.forEach(logger::info);
+				sortedContacts= addressBook.sortByCityStateOrZip();
+				logger.info("Contact sorted according to input are: ");
+				sortedContacts.forEach(logger::info);
 				addressBook.editContact();
 				addressBook.deleteContact();
 				addressBook.generateContactsListByCityAndState();
