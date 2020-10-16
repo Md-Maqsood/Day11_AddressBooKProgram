@@ -1,3 +1,0 @@
-Jeff Bezoss, xyz, San Francisco, California, 120012, 1234567890, jeff@gmail.com
-Mark Zukerberg, abc, New York City, New York, 123456, 9874563210, mark@gmail.com
-Satya Nadela, pqr, Los Angeles, California, 120546, 5463217890, satya@gmail.com
