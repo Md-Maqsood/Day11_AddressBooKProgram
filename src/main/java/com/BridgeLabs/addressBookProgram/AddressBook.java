@@ -42,37 +42,41 @@ public class AddressBook implements ManageAddressBook {
 	 */
 	public void addContacts() {
 		do {
-			logger.debug("Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
+			logger.info("Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
 			Contact newContact = new Contact(sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(),
 					Integer.parseInt(sc.nextLine()), Long.parseLong(sc.nextLine()), sc.nextLine());
 			if (contacts.stream().anyMatch(contact -> contact.equals(newContact))) {
-				logger.debug("Same entry already present. Cannot allow duplicate entries in an address book.");
+				logger.info("Same entry already present. Cannot allow duplicate entries in an address book.");
 			} else {
 				this.contacts.add(newContact);
 				this.nameToContactMap.put(newContact.getFirstName() + " " + newContact.getLastName(), newContact);
 			}
-			logger.debug("Enter 1 to add another contact, else enter 0: ");
+			logger.info("Enter 1 to add another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 
+	}
+	
+	public void sortContactsByName() {
+		contacts=contacts.stream().sorted((contact1,contact2)->contact1.getFirstName().compareTo(contact2.getFirstName())).collect(Collectors.toList());
 	}
 	
 	/**
 	 * uc8 Method to search all contacts in a given city/state in all address books
 	 */
 	public static void getPersonsByCityOrState() {
-		logger.debug("Choose \n1 To search by city\n2 To search by state\nEnter your choice: ");
+		logger.info("Choose \n1 To search by city\n2 To search by state\nEnter your choice: ");
 		SearchBy searchByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
-		logger.debug("Enter the name of " + searchByParameter.name() + ": ");
+		logger.info("Enter the name of " + searchByParameter.name() + ": ");
 		String cityOrStateName = sc.nextLine();
 		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
-			logger.debug("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
+			logger.info("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
 					+ addressBookName + " are: ");
 			addressBook.contacts.stream()
 					.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
 							.equals(cityOrStateName)))
-					.forEach(contact -> logger.debug(contact));
-			logger.debug("");
+					.forEach(contact -> logger.info(contact));
+			logger.info("");
 		});
 	}
 	
@@ -102,22 +106,22 @@ public class AddressBook implements ManageAddressBook {
 	 * uc9 Method to display all contacts in all cities/states in all address books
 	 */
 	public static void viewPersonsByCityOrState() {
-		logger.debug("Choose \n1 To view by city\n2 To view by state\nEnter your choice: ");
+		logger.info("Choose \n1 To view by city\n2 To view by state\nEnter your choice: ");
 		SearchBy viewByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
 		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
 			addressBook.generateContactsListByCityAndState();
-			logger.debug("In the address book " + addressBookName);
-			logger.debug("");
+			logger.info("In the address book " + addressBookName);
+			logger.info("");
 			(viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.keySet()
 					: addressBook.stateToContactsMap.keySet()).stream().forEach(cityOrStateName -> {
-						logger.debug(viewByParameter.name() + ": " + cityOrStateName);
+						logger.info(viewByParameter.name() + ": " + cityOrStateName);
 						(viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.get(cityOrStateName)
 								: addressBook.stateToContactsMap.get(cityOrStateName)).stream()
-										.forEach(contact -> logger.debug(contact));
-						logger.debug("");
+										.forEach(contact -> logger.info(contact));
+						logger.info("");
 					});
-			logger.debug("");
+			logger.info("");
 		});
 	}
 	
@@ -127,23 +131,23 @@ public class AddressBook implements ManageAddressBook {
 	public static void displayCountByCityAndState() {
 		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
-			logger.debug("In the address book " + addressBookName);
-			logger.debug("");
-			logger.debug("Contact counts by city");
+			logger.info("In the address book " + addressBookName);
+			logger.info("");
+			logger.info("Contact counts by city");
 			addressBook.cityToContactsMap.keySet().stream().forEach(
-					cityName -> logger.debug(cityName + ": " + addressBook.cityToContactsMap.get(cityName).size()));
-			logger.debug("\nContact counts by state");
+					cityName -> logger.info(cityName + ": " + addressBook.cityToContactsMap.get(cityName).size()));
+			logger.info("\nContact counts by state");
 			addressBook.stateToContactsMap.keySet().stream().forEach(
-					stateName -> logger.debug(stateName + ": " + addressBook.stateToContactsMap.get(stateName).size()));
-			logger.debug("");
+					stateName -> logger.info(stateName + ": " + addressBook.stateToContactsMap.get(stateName).size()));
+			logger.info("");
 		});
 	}
 
 	public void editContact() {
 		do {
-			logger.debug("Enter name of person whose contact details are to be edited: ");
+			logger.info("Enter name of person whose contact details are to be edited: ");
 			String name = sc.nextLine();
-			logger.debug("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
+			logger.info("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
 			try {
 				Contact toBeEditedContact=nameToContactMap.get(name);
 				toBeEditedContact.setAddress(sc.nextLine());
@@ -152,38 +156,38 @@ public class AddressBook implements ManageAddressBook {
 				toBeEditedContact.setZip(Integer.parseInt(sc.nextLine()));
 				toBeEditedContact.setPhoneNumber(Long.parseLong(sc.nextLine()));
 				toBeEditedContact.setEmail(sc.nextLine());
-				logger.debug("Contact after editing:\n"+toBeEditedContact);
+				logger.info("Contact after editing:\n"+toBeEditedContact);
 			} catch (NullPointerException e) {
-				logger.debug("No contact found with that name.");
+				logger.info("No contact found with that name.");
 			}
-			logger.debug("Enter 1 to edit another contact, else enter 0: ");
+			logger.info("Enter 1 to edit another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 	}
 
 	public void deleteContact() {
 		do {
-			logger.debug("Enter the name of Contact person to be deleted: ");
+			logger.info("Enter the name of Contact person to be deleted: ");
 			String name = sc.nextLine();
 			Contact toBeDeletedContact=nameToContactMap.get(name);
 			contacts.remove(toBeDeletedContact);
 			nameToContactMap.remove(name);
-			logger.debug("Address Book after deletion of contact: \n" + this);
-			logger.debug("Enter 1 to delete another contact, else enter 0: ");
+			logger.info("Address Book after deletion of contact: \n" + this);
+			logger.info("Enter 1 to delete another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 	}
 
 	public static void addAddressBooks() {
 		while (true) {
-			logger.debug("1.Add an address book\n2.Exit\nEnter your choice: ");
+			logger.info("1.Add an address book\n2.Exit\nEnter your choice: ");
 			int choice = Integer.parseInt(sc.nextLine());
 			if (choice == 1) {
-				logger.debug("Enter name of the address book");
+				logger.info("Enter name of the address book");
 				String name = sc.nextLine();
 				nameToAddressBookMap.put(name, new AddressBook(name));
 			} else if (choice == 2) {
 				break;
 			} else {
-				logger.debug("Invalid choice. Try again.");
+				logger.info("Invalid choice. Try again.");
 			}
 		}
 	}
@@ -196,18 +200,19 @@ public class AddressBook implements ManageAddressBook {
 	public static void main(String[] args) {
 		addAddressBooks();
 		do {
-			logger.debug("Enter the name of the address book to continue: ");
+			logger.info("Enter the name of the address book to continue: ");
 			AddressBook addressBook = nameToAddressBookMap.get(sc.nextLine());
 			if (addressBook == null) {
-				logger.debug("No address book found with that name.");
+				logger.info("No address book found with that name.");
 			} else {
 				addressBook.addContacts();
-				logger.debug(addressBook);
+				logger.info(addressBook);
+				addressBook.sortContactsByName();
 				addressBook.editContact();
 				addressBook.deleteContact();
 				addressBook.generateContactsListByCityAndState();
 			}
-			logger.debug("Enter 1 to continue with another address book, else enter 0: ");
+			logger.info("Enter 1 to continue with another address book, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
 		getPersonsByCityOrState();
 		viewPersonsByCityOrState();
