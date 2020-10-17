@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class AddressBookIOServiceTest {
+public class AddressBookFileIOServiceTest {
 	@Test
 	public void given3ContactsWhenWrittenToFileShouldMatchContactEntries() {
 		Contact jeff=new Contact("Jeff", "Bezoss", "xyz", "San Francisco", "California", 120012, 1234567890l, "jeff@gmail.com");
