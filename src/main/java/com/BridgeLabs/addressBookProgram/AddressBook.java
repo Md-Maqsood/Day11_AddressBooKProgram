@@ -13,34 +13,35 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AddressBook implements ManageAddressBook {
-	
+
 	public enum SearchBy {
 		CITY, STATE
 	}
-	
+
 	private static final Logger logger = LogManager.getLogger(AddressBook.class);
 	static Scanner sc = new Scanner(System.in);
 	static Map<String, AddressBook> nameToAddressBookMap = new HashMap<String, AddressBook>();
 	public String name;
 	public Map<String, List<Contact>> cityToContactsMap;
 	public Map<String, List<Contact>> stateToContactsMap;
-	public AddressBookFileIOService addressBookFileIOService;
+	public AddressBookCsvIOService addressBookCsvIOService;
 
 	public AddressBook(String name) {
 		super();
 		this.name = name;
-		this.addressBookFileIOService=new AddressBookFileIOService("addressBook-"+this.name+"-file.txt");
+		this.addressBookCsvIOService = new AddressBookCsvIOService("addressBook-" + this.name + "-Csvfile.csv");
 		this.cityToContactsMap = new TreeMap<String, List<Contact>>();
 		this.stateToContactsMap = new TreeMap<String, List<Contact>>();
 	}
 
 	/**
-	 *uc7
+	 * uc7
 	 */
 	public void addContacts() {
-		List<Contact> contacts=new LinkedList<Contact>();
+		List<Contact> contacts = new LinkedList<Contact>();
 		do {
-			logger.info("Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
+			logger.info(
+					"Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
 			Contact newContact = new Contact(sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(),
 					Integer.parseInt(sc.nextLine()), Long.parseLong(sc.nextLine()), sc.nextLine());
 			if (contacts.stream().anyMatch(contact -> contact.equals(newContact))) {
@@ -50,28 +51,36 @@ public class AddressBook implements ManageAddressBook {
 			}
 			logger.info("Enter 1 to add another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
-		this.addressBookFileIOService.writeContactDetails(contacts);
+		this.addressBookCsvIOService.writeContactDetails(contacts);
 	}
-	
+
 	public List<Contact> sortContactsByName() {
-		return this.addressBookFileIOService.readContactDetails().stream().sorted((contact1,contact2)->contact1.getFirstName().compareTo(contact2.getFirstName())).collect(Collectors.toList());
+		return this.addressBookCsvIOService.readContactDetails().stream()
+				.sorted((contact1, contact2) -> contact1.getFirstName().compareTo(contact2.getFirstName()))
+				.collect(Collectors.toList());
 	}
-	
-	public List<Contact> sortByCityStateOrZip(){
+
+	public List<Contact> sortByCityStateOrZip() {
 		logger.info("Enter 1 to sort by city\n2 to sort by state\n3 to sort by zip");
-		switch(Integer.parseInt(sc.nextLine())) {
+		switch (Integer.parseInt(sc.nextLine())) {
 		case 1:
-			return this.addressBookFileIOService.readContactDetails().stream().sorted((contact1,contact2)->contact1.getCity().compareTo(contact2.getCity())).collect(Collectors.toList());
+			return this.addressBookCsvIOService.readContactDetails().stream()
+					.sorted((contact1, contact2) -> contact1.getCity().compareTo(contact2.getCity()))
+					.collect(Collectors.toList());
 		case 2:
-			return this.addressBookFileIOService.readContactDetails().stream().sorted((contact1,contact2)->contact1.getState().compareTo(contact2.getState())).collect(Collectors.toList());
+			return this.addressBookCsvIOService.readContactDetails().stream()
+					.sorted((contact1, contact2) -> contact1.getState().compareTo(contact2.getState()))
+					.collect(Collectors.toList());
 		case 3:
-			return this.addressBookFileIOService.readContactDetails().stream().sorted((contact1,contact2)->((Integer)contact1.getZip()).compareTo((Integer)contact2.getZip())).collect(Collectors.toList());
+			return this.addressBookCsvIOService.readContactDetails().stream().sorted(
+					(contact1, contact2) -> ((Integer) contact1.getZip()).compareTo((Integer) contact2.getZip()))
+					.collect(Collectors.toList());
 		default:
 			logger.info("Invalid Input.");
-			return this.addressBookFileIOService.readContactDetails();
+			return this.addressBookCsvIOService.readContactDetails();
 		}
 	}
-	
+
 	/**
 	 * uc8 Method to search all contacts in a given city/state in all address books
 	 */
@@ -84,36 +93,36 @@ public class AddressBook implements ManageAddressBook {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
 			logger.info("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
 					+ addressBookName + " are: ");
-			addressBook.addressBookFileIOService.readContactDetails().stream()
+			addressBook.addressBookCsvIOService.readContactDetails().stream()
 					.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
 							.equals(cityOrStateName)))
 					.forEach(contact -> logger.info(contact));
 			logger.info("");
 		});
 	}
-	
+
 	/**
 	 * uc9 Method to map list of contacts to cities and states in this address book
 	 */
 	public void generateContactsListByCityAndState() {
-		Set<String> cityNames=this.addressBookFileIOService.readContactDetails().stream().map(contact->contact.getCity()).collect(Collectors.toSet());
-		Set<String> stateNames=this.addressBookFileIOService.readContactDetails().stream().map(contact->contact.getState()).collect(Collectors.toSet());
-		this.cityToContactsMap = cityNames.stream()
-				.collect(Collectors.toMap(cityName -> cityName,
-						cityName -> {
-							return this.addressBookFileIOService.readContactDetails().stream().filter(contact -> contact.getCity().equals(cityName)).sorted((c1, c2) -> {
-								return c1.getFirstName().compareTo(c2.getFirstName());
-							}).collect(Collectors.toList());
-						}));
-		this.stateToContactsMap = stateNames.stream()
-				.collect(Collectors.toMap(stateName -> stateName,
-						stateName -> {
-							return this.addressBookFileIOService.readContactDetails().stream().filter(contact -> contact.getState().equals(stateName)).sorted((c1, c2) -> {
-								return c1.getFirstName().compareTo(c2.getFirstName());
-							}).collect(Collectors.toList());
-						}));
-		}
-	
+		Set<String> cityNames = this.addressBookCsvIOService.readContactDetails().stream()
+				.map(contact -> contact.getCity()).collect(Collectors.toSet());
+		Set<String> stateNames = this.addressBookCsvIOService.readContactDetails().stream()
+				.map(contact -> contact.getState()).collect(Collectors.toSet());
+		this.cityToContactsMap = cityNames.stream().collect(Collectors.toMap(cityName -> cityName, cityName -> {
+			return this.addressBookCsvIOService.readContactDetails().stream()
+					.filter(contact -> contact.getCity().equals(cityName)).sorted((c1, c2) -> {
+						return c1.getFirstName().compareTo(c2.getFirstName());
+					}).collect(Collectors.toList());
+		}));
+		this.stateToContactsMap = stateNames.stream().collect(Collectors.toMap(stateName -> stateName, stateName -> {
+			return this.addressBookCsvIOService.readContactDetails().stream()
+					.filter(contact -> contact.getState().equals(stateName)).sorted((c1, c2) -> {
+						return c1.getFirstName().compareTo(c2.getFirstName());
+					}).collect(Collectors.toList());
+		}));
+	}
+
 	public static void viewPersonsByCityOrState() {
 		logger.info("Choose \n1 To view by city\n2 To view by state\nEnter your choice: ");
 		SearchBy viewByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
@@ -133,7 +142,7 @@ public class AddressBook implements ManageAddressBook {
 			logger.info("");
 		});
 	}
-	
+
 	/**
 	 * uc10 Method to display no. of contacts by city and state in all address books
 	 */
@@ -151,47 +160,48 @@ public class AddressBook implements ManageAddressBook {
 			logger.info("");
 		});
 	}
-	
-	public Map<String, Contact> getNameToContactMap(List<Contact> contacts){
-		return contacts.stream().collect(Collectors.toMap(contact->contact.getFirstName()+" "+contact.getLastName(), contact->contact));
+
+	public Map<String, Contact> getNameToContactMap(List<Contact> contacts) {
+		return contacts.stream().collect(
+				Collectors.toMap(contact -> contact.getFirstName() + " " + contact.getLastName(), contact -> contact));
 	}
-	
+
 	public void editContact() {
-		List<Contact> contacts=this.addressBookFileIOService.readContactDetails();
-		Map<String, Contact> nameToContactMap=getNameToContactMap(contacts);
+		List<Contact> contacts = this.addressBookCsvIOService.readContactDetails();
+		Map<String, Contact> nameToContactMap = getNameToContactMap(contacts);
 		do {
 			logger.info("Enter name of person whose contact details are to be edited: ");
 			String name = sc.nextLine();
 			logger.info("Enter the new fields in order: \naddress\ncity\nstate\nzip\nphone no.\nemail");
 			try {
-				Contact toBeEditedContact=nameToContactMap.get(name);
+				Contact toBeEditedContact = nameToContactMap.get(name);
 				toBeEditedContact.setAddress(sc.nextLine());
 				toBeEditedContact.setCity(sc.nextLine());
 				toBeEditedContact.setState(sc.nextLine());
 				toBeEditedContact.setZip(Integer.parseInt(sc.nextLine()));
 				toBeEditedContact.setPhoneNumber(Long.parseLong(sc.nextLine()));
 				toBeEditedContact.setEmail(sc.nextLine());
-				logger.info("Contact after editing:\n"+toBeEditedContact);
+				logger.info("Contact after editing:\n" + toBeEditedContact);
 			} catch (NullPointerException e) {
 				logger.info("No contact found with that name.");
 			}
 			logger.info("Enter 1 to edit another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
-		this.addressBookFileIOService.writeContactDetails(contacts);
+		this.addressBookCsvIOService.writeContactDetails(contacts);
 	}
 
 	public void deleteContact() {
-		List<Contact> contacts=this.addressBookFileIOService.readContactDetails();
-		Map<String, Contact> nameToContactMap=getNameToContactMap(contacts);
+		List<Contact> contacts = this.addressBookCsvIOService.readContactDetails();
+		Map<String, Contact> nameToContactMap = getNameToContactMap(contacts);
 		do {
 			logger.info("Enter the name of Contact person to be deleted: ");
 			String name = sc.nextLine();
-			Contact toBeDeletedContact=nameToContactMap.get(name);
+			Contact toBeDeletedContact = nameToContactMap.get(name);
 			contacts.remove(toBeDeletedContact);
 			nameToContactMap.remove(name);
 			logger.info("Enter 1 to delete another contact, else enter 0: ");
 		} while (Integer.parseInt(sc.nextLine()) == 1);
-		this.addressBookFileIOService.writeContactDetails(contacts);
+		this.addressBookCsvIOService.writeContactDetails(contacts);
 		logger.info("Address Book after deletion of contacts: \n" + this);
 	}
 
@@ -213,7 +223,7 @@ public class AddressBook implements ManageAddressBook {
 
 	@Override
 	public String toString() {
-		int size=this.addressBookFileIOService.readContactDetails().size();
+		int size = this.addressBookCsvIOService.readContactDetails().size();
 		return "Address Book " + name + " with " + size + (size == 1 ? " contact" : " contacts");
 	}
 
@@ -227,10 +237,10 @@ public class AddressBook implements ManageAddressBook {
 			} else {
 				addressBook.addContacts();
 				logger.info(addressBook);
-				List<Contact> sortedContacts =addressBook.sortContactsByName();
+				List<Contact> sortedContacts = addressBook.sortContactsByName();
 				logger.info("Contacts sorted by name are: ");
 				sortedContacts.forEach(logger::info);
-				sortedContacts= addressBook.sortByCityStateOrZip();
+				sortedContacts = addressBook.sortByCityStateOrZip();
 				logger.info("Contact sorted according to input are: ");
 				sortedContacts.forEach(logger::info);
 				addressBook.editContact();
@@ -253,107 +263,4 @@ interface ManageAddressBook {
 	public void editContact();
 
 	public void deleteContact();
-}
-
-class Contact {
-	private String firstName;
-	private String lastName;
-	private String address;
-	private String city;
-	private String state;
-	private int zip;
-	private long phoneNumber;
-	private String email;
-
-	
-
-	public Contact(String firstName, String lastName, String address, String city, String state, int zip,
-			long phoneNumber, String email) {
-		super();
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.address = address;
-		this.city = city;
-		this.state = state;
-		this.zip = zip;
-		this.phoneNumber = phoneNumber;
-		this.email = email;
-	}
-
-	public String getFirstName() {
-		return firstName;
-	}
-
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}
-
-	public int getZip() {
-		return zip;
-	}
-
-	public void setZip(int zip) {
-		this.zip = zip;
-	}
-
-	public long getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	public void setPhoneNumber(long phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	@Override
-	public String toString() {
-		return  firstName + " " + lastName + ", " + address + ", " + city + ", " + state + ", " + zip
-				+ ", " + phoneNumber + ", " + email;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		Contact checkContact = (Contact) obj;
-		return (checkContact.getFirstName().equalsIgnoreCase(this.firstName))
-				&& (checkContact.getLastName().equalsIgnoreCase(this.lastName));
-	}
 }
