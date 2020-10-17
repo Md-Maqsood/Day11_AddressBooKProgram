@@ -265,6 +265,8 @@ class Contact {
 	private long phoneNumber;
 	private String email;
 
+	
+
 	public Contact(String firstName, String lastName, String address, String city, String state, int zip,
 			long phoneNumber, String email) {
 		super();
@@ -351,8 +353,7 @@ class Contact {
 	@Override
 	public boolean equals(Object obj) {
 		Contact checkContact = (Contact) obj;
-		return (checkContact.getFirstName().equals(this.firstName))
-				&& (checkContact.getLastName().contentEquals(this.lastName));
+		return (checkContact.getFirstName().equalsIgnoreCase(this.firstName))
+				&& (checkContact.getLastName().equalsIgnoreCase(this.lastName));
 	}
-
 }
