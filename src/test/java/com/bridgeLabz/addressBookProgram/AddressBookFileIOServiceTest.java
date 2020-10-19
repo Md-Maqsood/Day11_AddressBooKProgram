@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.bridgeLabz.addressBookProgram.AddressBook.IOServiceType;
 import com.bridgeLabz.addressBookProgram.AddressBookFileIOService;
 import com.bridgeLabz.addressBookProgram.Contact;
 
@@ -16,9 +17,9 @@ public class AddressBookFileIOServiceTest {
 		Contact mark=new Contact("Mark", "Zukerberg", "abc", "New York City", "New York", 123456, 9874563210l, "mark@gmail.com");
 		Contact satya=new Contact("Satya", "Nadela", "pqr", "Los Angeles", "California", 120546, 5463217890l, "satya@gmail.com");
 		List<Contact> contacts=Arrays.asList(new Contact[] {jeff, mark, satya});
-		AddressBookFileIOService addressBookFileIOService=new AddressBookFileIOService("addressBook-test-file.txt");
-		addressBookFileIOService.writeContactDetails(contacts);
-		List<Contact> readContacts=addressBookFileIOService.readContactDetails();
+		AddressBook addressBook= new AddressBook("Test");
+		addressBook.writeContactListToIO(IOServiceType.FILE_IO, contacts);
+		List<Contact> readContacts=addressBook.readContactListFromIO(IOServiceType.FILE_IO);
 		Assert.assertEquals(jeff.toString(),readContacts.get(0).toString());
 		Assert.assertEquals(mark.toString(),readContacts.get(1).toString());
 		Assert.assertEquals(satya.toString(),readContacts.get(2).toString());
