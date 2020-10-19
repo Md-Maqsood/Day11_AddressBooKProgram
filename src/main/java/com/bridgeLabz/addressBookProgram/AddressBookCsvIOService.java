@@ -1,4 +1,4 @@
-package com.BridgeLabs.addressBookProgram;
+package com.bridgeLabz.addressBookProgram;
 
 import java.io.IOException;
 import java.io.Reader;

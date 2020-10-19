@@ -1,4 +1,4 @@
-package com.BridgeLabs.addressBookProgram;
+package com.bridgeLabz.addressBookProgram;
 
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -1,10 +1,13 @@
-package com.BridgeLabs.addressBookProgram;
+package com.bridgeLabz.addressBookProgram;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.bridgeLabz.addressBookProgram.AddressBookFileIOService;
+import com.bridgeLabz.addressBookProgram.Contact;
 
 public class AddressBookFileIOServiceTest {
 	@Test

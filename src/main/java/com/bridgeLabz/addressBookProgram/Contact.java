@@ -1,4 +1,4 @@
-package com.BridgeLabs.addressBookProgram;
+package com.bridgeLabz.addressBookProgram;
 
 public class Contact {
 	private String firstName;
