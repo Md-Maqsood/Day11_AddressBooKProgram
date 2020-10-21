@@ -6,8 +6,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.bridgeLabz.addressBookProgram.AddressBookJsonIOService;
-import com.bridgeLabz.addressBookProgram.Contact;
 import com.bridgeLabz.addressBookProgram.AddressBook.IOServiceType;
 
 public class AddressBookJsonIOServiceTest {
@@ -21,8 +19,8 @@ public class AddressBookJsonIOServiceTest {
 				"satya@gmail.com");
 		List<Contact> contacts = Arrays.asList(new Contact[] { jeff, mark, satya });
 		AddressBook addressBook= new AddressBook("Test");
-		addressBook.writeContactListToIO(IOServiceType.CSV_IO, contacts);
-		List<Contact> readContacts=addressBook.readContactListFromIO(IOServiceType.CSV_IO);
+		addressBook.writeContactListToIO(IOServiceType.JSON_IO, contacts);
+		List<Contact> readContacts=addressBook.readContactListFromIO(IOServiceType.JSON_IO);
 		Assert.assertEquals(jeff.toString(), readContacts.get(0).toString());
 		Assert.assertEquals(mark.toString(), readContacts.get(1).toString());
 		Assert.assertEquals(satya.toString(), readContacts.get(2).toString());

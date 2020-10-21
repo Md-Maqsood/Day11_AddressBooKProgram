@@ -6,8 +6,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.bridgeLabz.addressBookProgram.AddressBookCsvIOService;
-import com.bridgeLabz.addressBookProgram.Contact;
 import com.bridgeLabz.addressBookProgram.AddressBook.IOServiceType;
 
 public class AddressBookCsvIOServiceTest {

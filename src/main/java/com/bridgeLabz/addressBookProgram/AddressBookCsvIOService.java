@@ -29,7 +29,7 @@ public class AddressBookCsvIOService {
 
 	public void writeContactDetails(List<Contact> contacts) {
 		try (Writer writer = Files.newBufferedWriter(Paths.get(this.addressBookCSVFileName));) {
-			StatefulBeanToCsv<Contact> beanToCSV = new StatefulBeanToCsvBuilder(writer)
+			StatefulBeanToCsv<Contact> beanToCSV = new StatefulBeanToCsvBuilder<Contact>(writer)
 					.withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
 			beanToCSV.write(contacts);
 		} catch (CsvDataTypeMismatchException | CsvRequiredFieldEmptyException | IOException e) {

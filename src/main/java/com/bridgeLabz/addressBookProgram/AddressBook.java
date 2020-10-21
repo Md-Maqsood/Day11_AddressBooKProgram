@@ -43,7 +43,7 @@ public class AddressBook implements ManageAddressBook {
 		case CSV_IO:
 			return new AddressBookCsvIOService("addressBook-" + this.name + "-Csvfile.csv").readContactDetails();
 		case JSON_IO:
-			return new AddressBookFileIOService("addressBook-" + this.name + "-Jsonfile.json").readContactDetails();
+			return new AddressBookJsonIOService("addressBook-" + this.name + "-Jsonfile.json").readContactDetails();
 		default:
 			return null;		
 		}
@@ -58,7 +58,7 @@ public class AddressBook implements ManageAddressBook {
 			new AddressBookCsvIOService("addressBook-" + this.name + "-Csvfile.csv").writeContactDetails(contacts);
 			break;
 		case JSON_IO:
-			new AddressBookFileIOService("addressBook-" + this.name + "-Jsonfile.json").writeContactDetails(contacts);		
+			new AddressBookJsonIOService("addressBook-" + this.name + "-Jsonfile.json").writeContactDetails(contacts);		
 			break;
 		}
 	}
