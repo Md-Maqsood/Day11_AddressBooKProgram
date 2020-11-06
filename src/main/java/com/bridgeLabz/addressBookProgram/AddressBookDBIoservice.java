@@ -8,8 +8,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mysql.cj.protocol.Resultset;
-
 public class AddressBookDBIoservice {
 	private Connection getConnection() throws AddressBookDBIoException {
 		String JDBC_URL = "jdbc:mysql://localhost:3306/addressbookservicedb?useSSL=false";
