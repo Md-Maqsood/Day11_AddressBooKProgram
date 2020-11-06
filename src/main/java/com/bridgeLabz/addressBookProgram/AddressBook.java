@@ -361,4 +361,9 @@ public class AddressBook {
 		return this.addressBookDBIoservice.getCountOnCityOrStateGivenWhereClause(whereClauseForSqlQuery);
 	}
 
+	public void addContactToDataBase(String firstName, String lastName, String address, String city, String state,
+			int zip, long phoneNumber, String email) throws AddressBookDBIoException {
+		this.addressBookDBIoservice.addContactToDataBase(firstName,lastName, address, city, state, zip, phoneNumber, email);
+		this.contactList.add(new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email));	
+	}
 }

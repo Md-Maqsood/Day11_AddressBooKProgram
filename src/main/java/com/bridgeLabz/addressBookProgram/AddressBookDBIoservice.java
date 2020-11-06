@@ -115,7 +115,7 @@ public class AddressBookDBIoservice {
 	}
 
 	public List<Contact> getContactsAddedInDateRange(LocalDate startDate, LocalDate endDate) throws AddressBookDBIoException {
-		String sql=String.format("select * from person join address_details on person.contact_id=address_details.contact_id join contact_details on person.contact_id=contact_details.contact_id where date_added between cast('%s' as date) and cast('%s' as date);",startDate, endDate);
+		String sql=String.format("select * from person join address_details on person.contact_id=address_details.contact_id join contact_details on person.contact_id=contact_details.contact_id where date_added between cast('%s' as date) and cast('%s' as date);",startDate.toString(), endDate.toString());
 		try(Connection connection=this.getConnection()){
 			Statement statement=connection.createStatement();
 			ResultSet resultSet=statement.executeQuery(sql);
@@ -133,6 +133,51 @@ public class AddressBookDBIoservice {
 			return this.getContactListFromResultSet(resultSet).size();
 		}catch(SQLException e) {
 			throw new AddressBookDBIoException("Unable to get count based on given city or state");
+		}
+	}
+
+	public void addContactToDataBase(String firstName, String lastName, String address, String city, String state,
+			int zip, long phoneNumber, String email) throws AddressBookDBIoException {
+		LocalDate dateAdded=LocalDate.now();
+		String sql=String.format("insert into person (firstname,lastname,date_added) values ('%s','%s','%s');", firstName, lastName, dateAdded.toString());
+		Connection connection=null;
+		try {
+			connection=this.getConnection();
+			connection.setAutoCommit(false);
+			Statement statement=connection.createStatement();
+			int rowsAffected=statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
+			ResultSet resultSet=null;
+			int contactId=-1;
+			if(rowsAffected==1) {
+				resultSet=statement.getGeneratedKeys();
+				if(resultSet.next()) contactId=resultSet.getInt(1);
+			}else {
+				throw new AddressBookDBIoException("Unable to add contact to person table in database");
+			}
+			sql=String.format("insert into address_details values (%s,'%s','%s','%s',%s);", contactId, address, city, state, zip);
+			rowsAffected=statement.executeUpdate(sql);
+			if(rowsAffected!=1){
+				throw new AddressBookDBIoException("Unable to add contact to address_details table in database");
+			}
+			sql=String.format("insert into contact_details values (%s,%s,'%s');", contactId, phoneNumber, email);
+			rowsAffected=statement.executeUpdate(sql);
+			if(rowsAffected!=1){
+				throw new AddressBookDBIoException("Unable to add contact to contact_details table in database");
+			}
+			connection.commit();
+		}catch(SQLException e) {
+			try {
+				connection.rollback();
+				throw new AddressBookDBIoException("Unable to add contact to database");
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}finally {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

@@ -78,4 +78,22 @@ public class AddressBookDBIoserviceTest {
 			e.printStackTrace();
 		}
 	}
+	
+	@Test
+	public void givenContactWhenAddedToDataBaseShouldIncrementCountAndSyncWithDataBase() {
+		try {
+			this.addressBook.getContactsIntoListFromDataBase();
+			int numContactsBeforeAdding=this.addressBook.readContactListFromIO(IOServiceType.DB_IO).size();
+			String firstName="John",lastName="Yahya",address="lmn",city="Dallas",state="Texas";
+			int zip=123453;
+			long phoneNumber=6543217896l;
+			String email="john@gmail.com";
+			this.addressBook.addContactToDataBase(firstName, lastName, address, city, state, zip, phoneNumber, email);
+			int numContactsAfterAdding=this.addressBook.readContactListFromIO(IOServiceType.DB_IO).size();
+			Assert.assertTrue(this.addressBook.checkIfAddressBookInSyncWithDataBase(firstName, lastName));
+			Assert.assertEquals(numContactsBeforeAdding+1,numContactsAfterAdding);
+		}catch(AddressBookDBIoException e) {
+			e.printStackTrace();
+		}
+	}
 }
