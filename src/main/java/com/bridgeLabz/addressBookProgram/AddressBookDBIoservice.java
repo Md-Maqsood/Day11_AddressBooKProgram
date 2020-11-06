@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,6 +111,17 @@ public class AddressBookDBIoservice {
 			return this.getContactListFromResultSet(resultSet);
 		} catch (SQLException e) {
 			throw new AddressBookDBIoException("Unable to retrieve contact from database");
+		}
+	}
+
+	public List<Contact> getContactsAddedInDateRange(LocalDate startDate, LocalDate endDate) throws AddressBookDBIoException {
+		String sql=String.format("select * from person join address_details on person.contact_id=address_details.contact_id join contact_details on person.contact_id=contact_details.contact_id where date_added between cast('%s' as date) and cast('%s' as date);",startDate, endDate);
+		try(Connection connection=this.getConnection()){
+			Statement statement=connection.createStatement();
+			ResultSet resultSet=statement.executeQuery(sql);
+			return this.getContactListFromResultSet(resultSet);
+		}catch(SQLException e) {
+			throw new AddressBookDBIoException("Unable to retrieve contacts added in the given date range");
 		}
 	}
 }

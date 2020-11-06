@@ -1,5 +1,6 @@
 package com.bridgeLabz.addressBookProgram;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.Assert;
@@ -43,7 +44,20 @@ public class AddressBookDBIoserviceTest {
 		try {
 			this.addressBook.getContactsIntoListFromDataBase();
 			this.addressBook.updateContactDetailsInDataBase(firstName, lastName, address, city, state, zip, phoneNumber, email);
-			this.addressBook.checkIfAddressBookInSyncWithDataBase(firstName, lastName);
+			Assert.assertTrue(this.addressBook.checkIfAddressBookInSyncWithDataBase(firstName, lastName));
+		}catch(AddressBookDBIoException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void givenContactDetailsWhenSearchedOnDateAddedShouldMatchCount() {
+		try {
+			this.addressBook.getContactsIntoListFromDataBase();
+			LocalDate startDate=LocalDate.parse("2019-01-01");
+			LocalDate endDate=LocalDate.parse("2020-01-01");
+			int numContacts=this.addressBook.getContactsAddedInDateRange(startDate, endDate).size();
+			Assert.assertEquals(2, numContacts);
 		}catch(AddressBookDBIoException e) {
 			e.printStackTrace();
 		}

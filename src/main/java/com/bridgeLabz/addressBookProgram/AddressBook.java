@@ -1,5 +1,6 @@
 package com.bridgeLabz.addressBookProgram;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class AddressBook {
 		this.name = name;
 		this.cityToContactsMap = new TreeMap<String, List<Contact>>();
 		this.stateToContactsMap = new TreeMap<String, List<Contact>>();
-		addressBookDBIoservice = new AddressBookDBIoservice();
+		this.addressBookDBIoservice = new AddressBookDBIoservice();
 	}
 
 	public void getContactsIntoListFromDataBase() throws AddressBookDBIoException {
@@ -52,7 +53,7 @@ public class AddressBook {
 		case JSON_IO:
 			return new AddressBookJsonIOService("addressBook-" + this.name + "-Jsonfile.json").readContactDetails();
 		case DB_IO:
-			return new AddressBookDBIoservice().readContactDetails();
+			return this.addressBookDBIoservice.readContactDetails();
 		default:
 			return null;
 		}
@@ -349,6 +350,10 @@ public class AddressBook {
 		toBeUpdate.setZip(zip);
 		toBeUpdate.setPhoneNumber(phoneNumber);
 		toBeUpdate.setEmail(email);
+	}
+
+	public List<Contact> getContactsAddedInDateRange(LocalDate startDate, LocalDate endDate) throws AddressBookDBIoException {
+		return this.addressBookDBIoservice.getContactsAddedInDateRange(startDate,endDate);
 	}
 
 }
