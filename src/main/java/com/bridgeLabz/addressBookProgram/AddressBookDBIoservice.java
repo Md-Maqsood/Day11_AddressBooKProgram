@@ -124,4 +124,15 @@ public class AddressBookDBIoservice {
 			throw new AddressBookDBIoException("Unable to retrieve contacts added in the given date range");
 		}
 	}
+
+	public int getCountOnCityOrStateGivenWhereClause(String whereClauseForSqlQuery) throws AddressBookDBIoException {
+		String sql="select * from person join address_details on person.contact_id=address_details.contact_id join contact_details on person.contact_id=contact_details.contact_id "+whereClauseForSqlQuery+";";
+		try(Connection connection=this.getConnection()){
+			Statement statement=connection.createStatement();
+			ResultSet resultSet=statement.executeQuery(sql);
+			return this.getContactListFromResultSet(resultSet).size();
+		}catch(SQLException e) {
+			throw new AddressBookDBIoException("Unable to get count based on given city or state");
+		}
+	}
 }

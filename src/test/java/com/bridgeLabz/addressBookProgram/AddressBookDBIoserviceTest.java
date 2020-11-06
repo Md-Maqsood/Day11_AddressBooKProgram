@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.bridgeLabz.addressBookProgram.AddressBook.IOServiceType;
+import com.bridgeLabz.addressBookProgram.AddressBook.SearchBy;
 
 public class AddressBookDBIoserviceTest {
 	private AddressBook addressBook;
@@ -58,6 +59,21 @@ public class AddressBookDBIoserviceTest {
 			LocalDate endDate=LocalDate.parse("2020-01-01");
 			int numContacts=this.addressBook.getContactsAddedInDateRange(startDate, endDate).size();
 			Assert.assertEquals(2, numContacts);
+		}catch(AddressBookDBIoException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	public void givenCityOrStateNameWhenSerchedContactsShouldReturnProperCount(){
+		try {
+			this.addressBook.getContactsIntoListFromDataBase();
+			String city="Los Angeles";
+			String state="New York";
+			int countOnCity=this.addressBook.getCountOnCityOrState(city, SearchBy.CITY);
+			int countOnState=this.addressBook.getCountOnCityOrState(state, SearchBy.STATE);
+			Assert.assertEquals(1, countOnCity);
+			Assert.assertEquals(1, countOnState);
 		}catch(AddressBookDBIoException e) {
 			e.printStackTrace();
 		}

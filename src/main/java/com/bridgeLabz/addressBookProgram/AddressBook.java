@@ -356,4 +356,9 @@ public class AddressBook {
 		return this.addressBookDBIoservice.getContactsAddedInDateRange(startDate,endDate);
 	}
 
+	public int getCountOnCityOrState(String cityOrStateName, SearchBy searchByParameter) throws AddressBookDBIoException {
+		String whereClauseForSqlQuery=searchByParameter==SearchBy.CITY?"where city='"+cityOrStateName+"'":"where state='"+cityOrStateName+"'";
+		return this.addressBookDBIoservice.getCountOnCityOrStateGivenWhereClause(whereClauseForSqlQuery);
+	}
+
 }
