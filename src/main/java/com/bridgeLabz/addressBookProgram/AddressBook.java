@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 public class AddressBook {
 
 	public enum IOServiceType {
@@ -365,5 +366,32 @@ public class AddressBook {
 			int zip, long phoneNumber, String email) throws AddressBookDBIoException {
 		this.addressBookDBIoservice.addContactToDataBase(firstName,lastName, address, city, state, zip, phoneNumber, email);
 		this.contactList.add(new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email));	
+	}
+
+	public void addMultipleContactsWithThreads(List<Contact> contactListToBeAdded) {
+		Map<Integer, Boolean> contactAdditionStatus = new HashMap<Integer, Boolean>();
+		contactListToBeAdded.forEach(contact->contactAdditionStatus.put(contact.hashCode(),false));
+		for (Contact contact : contactListToBeAdded) {
+			Runnable task = () -> {
+				logger.info("Contact being added: " + Thread.currentThread().getName());
+				try {
+					this.addContactToDataBase(contact.getFirstName(), contact.getLastName(), contact.getAddress(), contact.getCity(), contact.getState(), contact.getZip(), contact.getPhoneNumber(), contact.getEmail());
+				} catch (AddressBookDBIoException e) {
+					e.printStackTrace();
+				}
+				contactAdditionStatus.put(contact.hashCode(), true);
+				logger.info("Employee added: " + Thread.currentThread().getName());
+			};
+			Thread thread = new Thread(task, contact.getFirstName());
+			thread.start();
+		}
+		while (contactAdditionStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		logger.info(this.contactList);
 	}
 }
