@@ -18,11 +18,16 @@ public class AddressBookJsonIOServiceTest {
 		Contact satya = new Contact("Satya", "Nadela", "pqr", "Los Angeles", "California", 120546, 5463217890l,
 				"satya@gmail.com");
 		List<Contact> contacts = Arrays.asList(new Contact[] { jeff, mark, satya });
-		AddressBook addressBook= new AddressBook("Test");
+		AddressBook addressBook = new AddressBook("Test");
 		addressBook.writeContactListToIO(IOServiceType.JSON_IO, contacts);
-		List<Contact> readContacts=addressBook.readContactListFromIO(IOServiceType.JSON_IO);
-		Assert.assertEquals(jeff.toString(), readContacts.get(0).toString());
-		Assert.assertEquals(mark.toString(), readContacts.get(1).toString());
-		Assert.assertEquals(satya.toString(), readContacts.get(2).toString());
+		List<Contact> readContacts;
+		try {
+			readContacts = addressBook.readContactListFromIO(IOServiceType.JSON_IO);
+			Assert.assertEquals(jeff.toString(), readContacts.get(0).toString());
+			Assert.assertEquals(mark.toString(), readContacts.get(1).toString());
+			Assert.assertEquals(satya.toString(), readContacts.get(2).toString());
+		} catch (AddressBookDBIoException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class AddressBook implements ManageAddressBook {
+public class AddressBook {
 	
 	public enum IOServiceType{
-		FILE_IO, CSV_IO, JSON_IO
+		FILE_IO, CSV_IO, JSON_IO, DB_IO
 	}
 
 	public enum SearchBy {
@@ -36,7 +36,7 @@ public class AddressBook implements ManageAddressBook {
 		this.stateToContactsMap = new TreeMap<String, List<Contact>>();
 	}
 
-	public List<Contact> readContactListFromIO(IOServiceType ioServiceType){
+	public List<Contact> readContactListFromIO(IOServiceType ioServiceType) throws AddressBookDBIoException{
 		switch(ioServiceType) {
 		case FILE_IO:
 			return new AddressBookFileIOService("addressBook-" + this.name + "-File.txt").readContactDetails();
@@ -44,6 +44,8 @@ public class AddressBook implements ManageAddressBook {
 			return new AddressBookCsvIOService("addressBook-" + this.name + "-Csvfile.csv").readContactDetails();
 		case JSON_IO:
 			return new AddressBookJsonIOService("addressBook-" + this.name + "-Jsonfile.json").readContactDetails();
+		case DB_IO:
+			return new AddressBookDBIoservice().readContactDetails();
 		default:
 			return null;		
 		}
@@ -81,13 +83,13 @@ public class AddressBook implements ManageAddressBook {
 		writeContactListToIO(IOServiceType.JSON_IO, contacts);
 	}
 
-	public List<Contact> sortContactsByName() {
+	public List<Contact> sortContactsByName() throws AddressBookDBIoException {
 		return readContactListFromIO(IOServiceType.JSON_IO).stream()
 				.sorted((contact1, contact2) -> contact1.getFirstName().compareTo(contact2.getFirstName()))
 				.collect(Collectors.toList());
 	}
 
-	public List<Contact> sortByCityStateOrZip() {
+	public List<Contact> sortByCityStateOrZip() throws AddressBookDBIoException {
 		logger.info("Enter 1 to sort by city\n2 to sort by state\n3 to sort by zip");
 		switch (Integer.parseInt(sc.nextLine())) {
 		case 1:
@@ -120,33 +122,48 @@ public class AddressBook implements ManageAddressBook {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
 			logger.info("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
 					+ addressBookName + " are: ");
-			addressBook.readContactListFromIO(IOServiceType.JSON_IO).stream()
-					.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
-							.equals(cityOrStateName)))
-					.forEach(contact -> logger.info(contact));
+			try {
+				addressBook.readContactListFromIO(IOServiceType.JSON_IO).stream()
+						.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
+								.equals(cityOrStateName)))
+						.forEach(contact -> logger.info(contact));
+			} catch (AddressBookDBIoException e) {
+				logger.info(e.getMessage());
+			}
 			logger.info("");
 		});
 	}
 
 	/**
 	 * uc9 Method to map list of contacts to cities and states in this address book
+	 * @throws AddressBookDBIoException 
 	 */
-	public void generateContactsListByCityAndState() {
+	public void generateContactsListByCityAndState() throws AddressBookDBIoException {
 		Set<String> cityNames = readContactListFromIO(IOServiceType.JSON_IO).stream()
 				.map(contact -> contact.getCity()).collect(Collectors.toSet());
 		Set<String> stateNames = readContactListFromIO(IOServiceType.JSON_IO).stream()
 				.map(contact -> contact.getState()).collect(Collectors.toSet());
 		this.cityToContactsMap = cityNames.stream().collect(Collectors.toMap(cityName -> cityName, cityName -> {
-			return readContactListFromIO(IOServiceType.JSON_IO).stream()
-					.filter(contact -> contact.getCity().equals(cityName)).sorted((c1, c2) -> {
-						return c1.getFirstName().compareTo(c2.getFirstName());
-					}).collect(Collectors.toList());
+			try {
+				return readContactListFromIO(IOServiceType.JSON_IO).stream()
+						.filter(contact -> contact.getCity().equals(cityName)).sorted((c1, c2) -> {
+							return c1.getFirstName().compareTo(c2.getFirstName());
+						}).collect(Collectors.toList());
+			} catch (AddressBookDBIoException e) {
+				logger.info(e.getMessage());
+				return null;
+			}
 		}));
 		this.stateToContactsMap = stateNames.stream().collect(Collectors.toMap(stateName -> stateName, stateName -> {
-			return readContactListFromIO(IOServiceType.JSON_IO).stream()
-					.filter(contact -> contact.getState().equals(stateName)).sorted((c1, c2) -> {
-						return c1.getFirstName().compareTo(c2.getFirstName());
-					}).collect(Collectors.toList());
+			try {
+				return readContactListFromIO(IOServiceType.JSON_IO).stream()
+						.filter(contact -> contact.getState().equals(stateName)).sorted((c1, c2) -> {
+							return c1.getFirstName().compareTo(c2.getFirstName());
+						}).collect(Collectors.toList());
+			} catch (AddressBookDBIoException e) {
+				logger.info(e.getMessage());
+				return null;
+			}
 		}));
 	}
 
@@ -155,7 +172,11 @@ public class AddressBook implements ManageAddressBook {
 		SearchBy viewByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
 		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
-			addressBook.generateContactsListByCityAndState();
+			try {
+				addressBook.generateContactsListByCityAndState();
+			} catch (AddressBookDBIoException e) {
+				logger.info(e.getMessage());
+			}
 			logger.info("In the address book " + addressBookName);
 			logger.info("");
 			(viewByParameter == SearchBy.CITY ? addressBook.cityToContactsMap.keySet()
@@ -193,7 +214,7 @@ public class AddressBook implements ManageAddressBook {
 				Collectors.toMap(contact -> contact.getFirstName() + " " + contact.getLastName(), contact -> contact));
 	}
 
-	public void editContact() {
+	public void editContact() throws AddressBookDBIoException {
 		List<Contact> contacts = readContactListFromIO(IOServiceType.JSON_IO);
 		Map<String, Contact> nameToContactMap = getNameToContactMap(contacts);
 		do {
@@ -217,7 +238,7 @@ public class AddressBook implements ManageAddressBook {
 		writeContactListToIO(IOServiceType.JSON_IO, contacts);
 	}
 
-	public void deleteContact() {
+	public void deleteContact() throws AddressBookDBIoException {
 		List<Contact> contacts = readContactListFromIO(IOServiceType.JSON_IO);
 		Map<String, Contact> nameToContactMap = getNameToContactMap(contacts);
 		do {
@@ -250,11 +271,16 @@ public class AddressBook implements ManageAddressBook {
 
 	@Override
 	public String toString() {
-		int size = readContactListFromIO(IOServiceType.JSON_IO).size();
+		int size=-1;
+		try {
+			size = readContactListFromIO(IOServiceType.JSON_IO).size();
+		} catch (AddressBookDBIoException e) {
+			logger.info(e.getMessage());
+		}
 		return "Address Book " + name + " with " + size + (size == 1 ? " contact" : " contacts");
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws AddressBookDBIoException {
 		addAddressBooks();
 		do {
 			logger.info("Enter the name of the address book to continue: ");
@@ -282,12 +308,4 @@ public class AddressBook implements ManageAddressBook {
 		sc.close();
 	}
 
-}
-
-interface ManageAddressBook {
-	public void addContacts();
-
-	public void editContact();
-
-	public void deleteContact();
 }
