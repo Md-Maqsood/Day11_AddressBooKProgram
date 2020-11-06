@@ -13,8 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class AddressBook {
-	
-	public enum IOServiceType{
+
+	public enum IOServiceType {
 		FILE_IO, CSV_IO, JSON_IO, DB_IO
 	}
 
@@ -28,16 +28,23 @@ public class AddressBook {
 	public String name;
 	public Map<String, List<Contact>> cityToContactsMap;
 	public Map<String, List<Contact>> stateToContactsMap;
+	public List<Contact> contactList;
+	private AddressBookDBIoservice addressBookDBIoservice;
 
 	public AddressBook(String name) {
 		super();
 		this.name = name;
 		this.cityToContactsMap = new TreeMap<String, List<Contact>>();
 		this.stateToContactsMap = new TreeMap<String, List<Contact>>();
+		addressBookDBIoservice = new AddressBookDBIoservice();
 	}
 
-	public List<Contact> readContactListFromIO(IOServiceType ioServiceType) throws AddressBookDBIoException{
-		switch(ioServiceType) {
+	public void getContactsIntoListFromDataBase() throws AddressBookDBIoException {
+		this.contactList = this.addressBookDBIoservice.readContactDetails();
+	}
+
+	public List<Contact> readContactListFromIO(IOServiceType ioServiceType) throws AddressBookDBIoException {
+		switch (ioServiceType) {
 		case FILE_IO:
 			return new AddressBookFileIOService("addressBook-" + this.name + "-File.txt").readContactDetails();
 		case CSV_IO:
@@ -47,30 +54,33 @@ public class AddressBook {
 		case DB_IO:
 			return new AddressBookDBIoservice().readContactDetails();
 		default:
-			return null;		
+			return null;
 		}
 	}
-	
-	public void writeContactListToIO(IOServiceType ioServiceType, List<Contact> contacts){
-		switch(ioServiceType) {
+
+	public void writeContactListToIO(IOServiceType ioServiceType, List<Contact> contacts) {
+		switch (ioServiceType) {
 		case FILE_IO:
-			new AddressBookFileIOService("addressBook-" + this.name + "-File.txt").writeContactDetails(contacts);;
+			new AddressBookFileIOService("addressBook-" + this.name + "-File.txt").writeContactDetails(contacts);
+			;
 			break;
 		case CSV_IO:
 			new AddressBookCsvIOService("addressBook-" + this.name + "-Csvfile.csv").writeContactDetails(contacts);
 			break;
 		case JSON_IO:
-			new AddressBookJsonIOService("addressBook-" + this.name + "-Jsonfile.json").writeContactDetails(contacts);		
+			new AddressBookJsonIOService("addressBook-" + this.name + "-Jsonfile.json").writeContactDetails(contacts);
 			break;
 		}
 	}
+
 	/**
 	 * uc7
 	 */
 	public void addContacts() {
 		List<Contact> contacts = new LinkedList<Contact>();
 		do {
-			logger.info("Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
+			logger.info(
+					"Enter the contact details in order: \nfirst_name\nlastname\naddress\ncity\nstate\nzip\nphone no.\nemail");
 			Contact newContact = new Contact(sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(), sc.nextLine(),
 					Integer.parseInt(sc.nextLine()), Long.parseLong(sc.nextLine()), sc.nextLine());
 			if (contacts.stream().anyMatch(contact -> contact.equals(newContact))) {
@@ -123,8 +133,8 @@ public class AddressBook {
 			logger.info("Persons in the " + searchByParameter.name() + " " + cityOrStateName + " in the address book "
 					+ addressBookName + " are: ");
 			try {
-				addressBook.readContactListFromIO(IOServiceType.JSON_IO).stream()
-						.filter(contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
+				addressBook.readContactListFromIO(IOServiceType.JSON_IO).stream().filter(
+						contact -> ((searchByParameter == SearchBy.CITY ? contact.getCity() : contact.getState())
 								.equals(cityOrStateName)))
 						.forEach(contact -> logger.info(contact));
 			} catch (AddressBookDBIoException e) {
@@ -136,11 +146,12 @@ public class AddressBook {
 
 	/**
 	 * uc9 Method to map list of contacts to cities and states in this address book
-	 * @throws AddressBookDBIoException 
+	 * 
+	 * @throws AddressBookDBIoException
 	 */
 	public void generateContactsListByCityAndState() throws AddressBookDBIoException {
-		Set<String> cityNames = readContactListFromIO(IOServiceType.JSON_IO).stream()
-				.map(contact -> contact.getCity()).collect(Collectors.toSet());
+		Set<String> cityNames = readContactListFromIO(IOServiceType.JSON_IO).stream().map(contact -> contact.getCity())
+				.collect(Collectors.toSet());
 		Set<String> stateNames = readContactListFromIO(IOServiceType.JSON_IO).stream()
 				.map(contact -> contact.getState()).collect(Collectors.toSet());
 		this.cityToContactsMap = cityNames.stream().collect(Collectors.toMap(cityName -> cityName, cityName -> {
@@ -271,7 +282,7 @@ public class AddressBook {
 
 	@Override
 	public String toString() {
-		int size=-1;
+		int size = -1;
 		try {
 			size = readContactListFromIO(IOServiceType.JSON_IO).size();
 		} catch (AddressBookDBIoException e) {
@@ -306,6 +317,38 @@ public class AddressBook {
 		viewPersonsByCityOrState();
 		displayCountByCityAndState();
 		sc.close();
+	}
+
+	public boolean checkIfAddressBookInSyncWithDataBase(String firstName, String lastName)
+			throws AddressBookDBIoException {
+		Contact contactInList = this.getContactFromList(firstName, lastName);
+		List<Contact> contactInDataBase = this.addressBookDBIoservice.getContactFromDataBase(firstName, lastName);
+		if (contactInDataBase.isEmpty()) {
+			if (contactInList == null)
+				return true;
+			else
+				return false;
+		}
+		return contactInDataBase.get(0).equals(contactInList);
+	}
+
+	public Contact getContactFromList(String firstName, String lastName) {
+		return this.contactList.stream()
+				.filter(contact -> contact.getFirstName().equals(firstName) && contact.getLastName().equals(lastName))
+				.findFirst().orElse(null);
+	}
+
+	public void updateContactDetailsInDataBase(String firstName, String lastName, String address, String city,
+			String state, int zip, long phoneNumber, String email) throws AddressBookDBIoException {
+		this.addressBookDBIoservice.updateAddressDetails(firstName, lastName, address, city, state, zip, phoneNumber,
+				email);
+		Contact toBeUpdate = this.getContactFromList(firstName, lastName);
+		toBeUpdate.setAddress(address);
+		toBeUpdate.setCity(city);
+		toBeUpdate.setState(state);
+		toBeUpdate.setZip(zip);
+		toBeUpdate.setPhoneNumber(phoneNumber);
+		toBeUpdate.setEmail(email);
 	}
 
 }

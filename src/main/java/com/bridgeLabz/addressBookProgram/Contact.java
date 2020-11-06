@@ -10,8 +10,6 @@ public class Contact {
 	private long phoneNumber;
 	private String email;
 
-	
-
 	public Contact(String firstName, String lastName, String address, String city, String state, int zip,
 			long phoneNumber, String email) {
 		super();
@@ -91,14 +89,17 @@ public class Contact {
 
 	@Override
 	public String toString() {
-		return  firstName + " " + lastName + ", " + address + ", " + city + ", " + state + ", " + zip
-				+ ", " + phoneNumber + ", " + email;
+		return firstName + " " + lastName + ", " + address + ", " + city + ", " + state + ", " + zip + ", "
+				+ phoneNumber + ", " + email;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		Contact checkContact = (Contact) obj;
-		return (checkContact.getFirstName().equalsIgnoreCase(this.firstName))
-				&& (checkContact.getLastName().equalsIgnoreCase(this.lastName));
+		return (checkContact.getFirstName().equals(this.firstName))
+				&& (checkContact.getLastName().equals(this.lastName))
+				&& (checkContact.getAddress().equals(this.address)) && (checkContact.getCity().equals(this.city))
+				&& (checkContact.getState().equals(this.state)) && (checkContact.getZip() == this.zip)
+				&& (checkContact.getPhoneNumber() == this.phoneNumber) && (checkContact.getEmail().equals(this.email));
 	}
 }
