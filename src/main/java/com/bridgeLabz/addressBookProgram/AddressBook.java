@@ -66,10 +66,20 @@ public class AddressBook {
 		contactInList.setId(contactToBeUpdated.getId());
 	}
 
+	public void deleteContactFromList(String firstName, String lastName) throws AddressBookDBIoException {
+		Contact contactToBeDeleted=this.getContactFromList(firstName, lastName);
+		if(contactToBeDeleted==null) {
+			throw new AddressBookDBIoException("No contact with given name present in adressbook memory");
+		}
+		this.contactList.remove(contactToBeDeleted);
+	}
 	
-	public boolean checkIfAddressBookInSyncWithResIO(Contact contactInRestIO) {
-		Contact contactInList=this.getContactFromList(contactInRestIO.getFirstName(), contactInRestIO.getLastName());
-		if(contactInList==null) return false;
+	public boolean checkIfAddressBookInSyncWithResIO(String firstName, String lastName, Contact contactInRestIO) {
+		Contact contactInList=this.getContactFromList(firstName, lastName);
+		if(contactInList==null) {
+			if(contactInRestIO==null) return true;
+			else return false;
+		}
 		return contactInList.equals(contactInRestIO);
 	}
 

@@ -54,21 +54,46 @@ public class AddressBookRestIOServiceTest {
 		Contact contactAman=new Contact(6,"Aman", "Chaudhry", "mno", "New Delhi", "Delhi", 804567, 7867878998l, "arvind@gmail.com");
 		Contact[] contactsToBeAdded= {contactBill, contactMike, contactAman};
 		this.addMultipleContacts(Arrays.asList(contactsToBeAdded),addressBook);
-		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactBill));
-		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactMike));
-		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactAman));
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO("Bill", "Gates",contactBill));
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO("Mike", "Tyson",contactMike));
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO("Aman", "Chaudhry",contactAman));
 		int numOfContacts=addressBook.countEntries();
 		Assert.assertEquals(6, numOfContacts);
 	}
 	
-	@Test
+	@Ignore
 	public void givenContactDetails_whenUpdatedOnJsonServer_ShouldSyncWithAddressBook() {
 		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(this.getContactDetails()));
 		Contact contactToBeUpdated=new Contact(3,"Satya", "Nadela", "ghk", "Dallas", "Texas", 123457, 7654321789l, "satya@gmail.com");
 		this.updateContactDetails(contactToBeUpdated,addressBook);
-		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactToBeUpdated));		
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO("Satya","Nadela",contactToBeUpdated));		
 	}
 	
+	@Test
+	public void givenContactDetails_WhenDeletedShouldSyncWithAddressBookAndMatchTheCount() {
+		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(this.getContactDetails()));
+		int contactIdToBedeleted=2;
+		String contactFirstName="Mark";
+		String contactLastName="Zukerberg";
+		try {
+			this.deleteContact(contactIdToBedeleted, contactFirstName, contactLastName, addressBook);
+		} catch (AddressBookDBIoException e) {
+			e.printStackTrace();
+		}
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactFirstName, contactLastName, null));
+		int numOfContacts=addressBook.countEntries();
+		Assert.assertEquals(2, numOfContacts);
+	}
+	
+	private void deleteContact(int contactIdToBedeleted, String contactFirstName, String contactLastName,AddressBook addressBook) throws AddressBookDBIoException {
+		RequestSpecification request=RestAssured.given();
+		request.header("Content-Type","apllication/json");
+		Response response=request.delete("/contacts/"+contactIdToBedeleted);
+		if(response.getStatusCode()==200){
+			addressBook.deleteContactFromList(contactFirstName, contactLastName);
+		}
+	}
+
 	private void updateContactDetails(Contact contactToBeUpdated, AddressBook addressBook) {
 		String contactJson=new Gson().toJson(contactToBeUpdated,Contact.class);
 		RequestSpecification request=RestAssured.given();
