@@ -54,6 +54,12 @@ public class AddressBook {
 	public void addContactToContactList(Contact contactToBeAddedToAddressBook) {
 		this.contactList.add(contactToBeAddedToAddressBook);
 	}
+	
+	public boolean checkIfAddressBookInSyncWithResIO(Contact contactInRestIO) {
+		Contact contactInList=this.getContactFromList(contactInRestIO.getFirstName(), contactInRestIO.getLastName());
+		if(contactInList==null) return false;
+		return contactInList.equals(contactInRestIO);
+	}
 
 	public void getContactsIntoListFromDataBase() throws AddressBookDBIoException {
 		this.contactList = this.addressBookDBIoservice.readContactDetails();

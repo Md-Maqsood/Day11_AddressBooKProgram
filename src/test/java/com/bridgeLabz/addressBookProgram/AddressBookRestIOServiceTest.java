@@ -1,6 +1,7 @@
 package com.bridgeLabz.addressBookProgram;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,7 @@ public class AddressBookRestIOServiceTest {
 		RestAssured.port = 3000;
 	}
 	
-	@Test
+	@Ignore
 	public void givenContactDetailsOnJsonServer_WhenReadShouldMatchCount() {
 		Contact[] arrayOfContacts=this.getContactDetails();
 		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(arrayOfContacts));
@@ -31,7 +32,7 @@ public class AddressBookRestIOServiceTest {
 		Assert.assertEquals(3, numOfContacts);
 	}
 
-	@Test
+	@Ignore
 	public void givenContactDetails_WhenWritten_ShouldMatch201ResponseAndCount() {
 		Contact[] arrayOfContacts=this.getContactDetails();
 		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(arrayOfContacts));
@@ -44,6 +45,30 @@ public class AddressBookRestIOServiceTest {
 		int numOfContacts=addressBook.countEntries();
 		Assert.assertEquals(4,numOfContacts);
 	}
+	
+	@Test
+	public void given3ContactDetails_WhenAddedToRestIO_ShouldSyncWithAddressBookAndMatchCount() {
+		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(this.getContactDetails()));
+		Contact contactBill=new Contact(4,"Bill", "Gates", "ghk", "Dallas", "Texas", 123457, 7654321789l, "bill@gmail.com");
+		Contact contactMike=new Contact(5,"Mike", "Tyson", "def", "Los Angeles", "California", 123232, 8796543210l, "mike@gmail.com");
+		Contact contactAman=new Contact("Aman", "Chaudhry", "mno", "New Delhi", "Delhi", 804567, 7867878998l, "arvind@gmail.com");
+		Contact[] contactsToBeAdded= {contactBill, contactMike, contactAman};
+		this.addMultipleContacts(Arrays.asList(contactsToBeAdded),addressBook);
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactBill));
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactMike));
+		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO(contactAman));
+		int numOfContacts=addressBook.countEntries();
+		Assert.assertEquals(6, numOfContacts);
+	}
+	private void addMultipleContacts(List<Contact> contactsToBeAdded, AddressBook addressBook) {
+		contactsToBeAdded.forEach(contact->{
+			Response response=this.writeContactToAddressBook(contact);
+			if(response.getStatusCode()==201) {
+				addressBook.addContactToContactList(contact);
+			}
+		});
+	}
+
 	private Response writeContactToAddressBook(Contact contactToBeWritten) {
 		String contactJson=new Gson().toJson(contactToBeWritten, Contact.class);
 		RequestSpecification request=RestAssured.given();
