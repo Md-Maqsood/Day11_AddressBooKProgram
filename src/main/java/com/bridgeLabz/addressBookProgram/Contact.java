@@ -1,6 +1,8 @@
 package com.bridgeLabz.addressBookProgram;
 
 public class Contact {
+	private int id;
+
 	private String firstName;
 	private String lastName;
 	private String address;
@@ -21,6 +23,12 @@ public class Contact {
 		this.zip = zip;
 		this.phoneNumber = phoneNumber;
 		this.email = email;
+	}
+	
+	public Contact(int id, String firstName, String lastName, String address, String city, String state, int zip,
+			long phoneNumber, String email) {
+		this(firstName, lastName, address, city, state, zip, phoneNumber, email);
+		this.id = id;
 	}
 
 	public String getFirstName() {

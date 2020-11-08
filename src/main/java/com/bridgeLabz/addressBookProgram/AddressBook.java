@@ -40,6 +40,20 @@ public class AddressBook {
 		this.stateToContactsMap = new TreeMap<String, List<Contact>>();
 		this.addressBookDBIoservice = new AddressBookDBIoservice();
 	}
+	
+	public AddressBook(String name, List<Contact> contactList) {
+		this(name);
+		this.contactList=new LinkedList<Contact>(contactList);
+	}
+	
+	public int countEntries() {
+		return this.contactList.size();
+	}
+	
+
+	public void addContactToContactList(Contact contactToBeAddedToAddressBook) {
+		this.contactList.add(contactToBeAddedToAddressBook);
+	}
 
 	public void getContactsIntoListFromDataBase() throws AddressBookDBIoException {
 		this.contactList = this.addressBookDBIoservice.readContactDetails();
@@ -64,7 +78,6 @@ public class AddressBook {
 		switch (ioServiceType) {
 		case FILE_IO:
 			new AddressBookFileIOService("addressBook-" + this.name + "-File.txt").writeContactDetails(contacts);
-			;
 			break;
 		case CSV_IO:
 			new AddressBookCsvIOService("addressBook-" + this.name + "-Csvfile.csv").writeContactDetails(contacts);
@@ -394,4 +407,5 @@ public class AddressBook {
 		}
 		logger.info(this.contactList);
 	}
+
 }
