@@ -55,6 +55,18 @@ public class AddressBook {
 		this.contactList.add(contactToBeAddedToAddressBook);
 	}
 	
+	public void updateContactInContactsList(Contact contactToBeUpdated) {
+		Contact contactInList=this.getContactFromList(contactToBeUpdated.getFirstName(), contactToBeUpdated.getLastName());
+		contactInList.setAddress(contactToBeUpdated.getAddress());
+		contactInList.setCity(contactToBeUpdated.getCity());
+		contactInList.setState(contactToBeUpdated.getState());
+		contactInList.setZip(contactToBeUpdated.getZip());
+		contactInList.setPhoneNumber(contactToBeUpdated.getPhoneNumber());
+		contactInList.setEmail(contactToBeUpdated.getEmail());
+		contactInList.setId(contactToBeUpdated.getId());
+	}
+
+	
 	public boolean checkIfAddressBookInSyncWithResIO(Contact contactInRestIO) {
 		Contact contactInList=this.getContactFromList(contactInRestIO.getFirstName(), contactInRestIO.getLastName());
 		if(contactInList==null) return false;
