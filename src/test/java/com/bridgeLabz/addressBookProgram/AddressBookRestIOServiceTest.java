@@ -23,7 +23,7 @@ public class AddressBookRestIOServiceTest {
 		RestAssured.port = 3000;
 	}
 	
-	@Ignore
+	@Test
 	public void givenContactDetailsOnJsonServer_WhenReadShouldMatchCount() {
 		Contact[] arrayOfContacts=this.getContactDetails();
 		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(arrayOfContacts));
