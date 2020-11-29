@@ -61,7 +61,7 @@ public class AddressBookRestIOServiceTest {
 		Assert.assertEquals(6, numOfContacts);
 	}
 	
-	@Ignore
+	@Test
 	public void givenContactDetails_whenUpdatedOnJsonServer_ShouldSyncWithAddressBook() {
 		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(this.getContactDetails()));
 		Contact contactToBeUpdated=new Contact(3,"Satya", "Nadela", "ghk", "Dallas", "Texas", 123457, 7654321789l, "satya@gmail.com");
@@ -69,7 +69,7 @@ public class AddressBookRestIOServiceTest {
 		Assert.assertTrue(addressBook.checkIfAddressBookInSyncWithResIO("Satya","Nadela",contactToBeUpdated));		
 	}
 	
-	@Test
+	@Ignore
 	public void givenContactDetails_WhenDeletedShouldSyncWithAddressBookAndMatchTheCount() {
 		AddressBook addressBook=new AddressBook("Book1", Arrays.asList(this.getContactDetails()));
 		int contactIdToBedeleted=2;

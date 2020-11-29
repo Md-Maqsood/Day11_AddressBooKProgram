@@ -44,10 +44,10 @@ public class AddressBookCsvIOService {
 			List<String[]> contactStrings = csvReader.readAll();
 			contactStrings.remove(0);
 			contacts = contactStrings.stream().map(string -> {
-				String firstName = string[3], lastName = string[4], address = string[0];
-				String city = string[1], state = string[6];
-				int zip = Integer.parseInt(string[7]);
-				long phoneNumber = Long.parseLong(string[5]);
+				String firstName = string[3], lastName = string[5], address = string[0];
+				String city = string[1], state = string[7];
+				int zip = Integer.parseInt(string[8]);
+				long phoneNumber = Long.parseLong(string[6]);
 				String email = string[2];
 				return new Contact(firstName, lastName, address, city, state, zip, phoneNumber, email);
 			}).collect(Collectors.toList());

@@ -46,6 +46,8 @@ public class AddressBook {
 		this.contactList=new LinkedList<Contact>(contactList);
 	}
 	
+	
+	//Rest IO Starting
 	public int countEntries() {
 		return this.contactList.size();
 	}
@@ -82,11 +84,14 @@ public class AddressBook {
 		}
 		return contactInList.equals(contactInRestIO);
 	}
+	
+	//Rest IO Ending	
 
 	public void getContactsIntoListFromDataBase() throws AddressBookDBIoException {
 		this.contactList = this.addressBookDBIoservice.readContactDetails();
 	}
 
+	//File Input Output and Manipulation Start
 	public List<Contact> readContactListFromIO(IOServiceType ioServiceType) throws AddressBookDBIoException {
 		switch (ioServiceType) {
 		case FILE_IO:
@@ -163,9 +168,6 @@ public class AddressBook {
 		}
 	}
 
-	/**
-	 * uc8 Method to search all contacts in a given city/state in all address books
-	 */
 	public static void getPersonsByCityOrState() {
 		logger.info("Choose \n1 To search by city\n2 To search by state\nEnter your choice: ");
 		SearchBy searchByParameter = (Integer.parseInt(sc.nextLine()) == 1) ? SearchBy.CITY : SearchBy.STATE;
@@ -187,11 +189,6 @@ public class AddressBook {
 		});
 	}
 
-	/**
-	 * uc9 Method to map list of contacts to cities and states in this address book
-	 * 
-	 * @throws AddressBookDBIoException
-	 */
 	public void generateContactsListByCityAndState() throws AddressBookDBIoException {
 		Set<String> cityNames = readContactListFromIO(IOServiceType.JSON_IO).stream().map(contact -> contact.getCity())
 				.collect(Collectors.toSet());
@@ -245,9 +242,6 @@ public class AddressBook {
 		});
 	}
 
-	/**
-	 * uc10 Method to display no. of contacts by city and state in all address books
-	 */
 	public static void displayCountByCityAndState() {
 		nameToAddressBookMap.keySet().stream().forEach(addressBookName -> {
 			AddressBook addressBook = nameToAddressBookMap.get(addressBookName);
@@ -361,7 +355,9 @@ public class AddressBook {
 		displayCountByCityAndState();
 		sc.close();
 	}
-
+	//File IO And Manipulation End
+	
+	//Database IO and Multi-threading	
 	public boolean checkIfAddressBookInSyncWithDataBase(String firstName, String lastName)
 			throws AddressBookDBIoException {
 		Contact contactInList = this.getContactFromList(firstName, lastName);
